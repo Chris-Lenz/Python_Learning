@@ -8,44 +8,45 @@
 
 
 
-
+#Import modules and declare variables
 
 import socket
 import time
 from datetime import datetime
 import threading
-
 from queue import Queue
+import sys
 socket.setdefaulttimeout(0.25)
 print_lock = threading.Lock()
 
 target = ""
-
 target_file = "results.csv"
+
+#create CSV file with 1st line titles
 with open(target_file, "a") as file:
     file.write("Host Name,Scanned,Open Ports,Start Time,End Time,Elapsed Time, \n")
 
-while target.lower() != "quit":
-    print(target)
 
-
-
-    # input hostname or IP, try again on error
+def port_scanner1():
+# input hostname or IP, try again on error, write errors to csv file
     while True:
         try:
             target = input('Enter the host to be scanned (type quit to exit): ')
             t_IP = socket.gethostbyname(target)
             break
         except:
+            if target.lower() == "quit":
+                sys.exit("exiting")
             with open(target_file, 'a') as file:
                 file.write(target + "," + "NO\n")
-
             print(str(target) + " does not exist, please try again")
 
+    #write target name and Yes to file
     with open(target_file, "a") as file:
         file.write(target + ",YES,")
     print ('Starting scan on host: ', t_IP)
 
+    #Scan open ports and write to file
     def portscan(port):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
@@ -80,8 +81,6 @@ while target.lower() != "quit":
     endtime = str(datetime.now())
 
 
-
-
     print(target + " scan complete")
     start_time = ("{:.19}".format(date))
     end_time = ("{:.19}".format(endtime))
@@ -95,7 +94,8 @@ while target.lower() != "quit":
         file.write("," + start_time)
         file.write("," + end_time)
         file.write("," + elapsed_time + "\n")
-
+    return port_scanner1()
+port_scanner1()
 
 
 
